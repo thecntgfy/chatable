@@ -2,6 +2,7 @@ import os
 import io
 import logging
 from contextlib import redirect_stdout
+import html
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -106,7 +107,9 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         return
     output_text = stdout.getvalue()
     if output_text:
-        await update.message.reply_text(f"\`\`\`\n{output_text}\n\`\`\`", parse_mode="Markdown")
+        await update.message.reply_text(
+            f"<pre>{html.escape(output_text)}</pre>", parse_mode="HTML"
+        )
     if os.path.exists(output_file):
         await update.message.reply_photo(photo=open(output_file, "rb"))
 
