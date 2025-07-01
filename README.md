@@ -23,3 +23,24 @@ python bot.py  # default model
 # or specify a model
 # python bot.py --model openai/gpt-3.5-turbo
 ```
+
+## Docker
+
+Build the image:
+
+```bash
+docker build -t chatable .
+```
+
+Run the bot with the required environment variables:
+
+```bash
+docker run -e TELEGRAM_TOKEN=your_token -e OPENROUTER_API_KEY=your_key chatable
+```
+
+To choose a different model, either set `OPENROUTER_MODEL` or pass a flag:
+
+```bash
+docker run -e TELEGRAM_TOKEN=your_token -e OPENROUTER_API_KEY=your_key \
+  chatable --model openai/gpt-3.5-turbo
+```
