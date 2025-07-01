@@ -13,7 +13,7 @@ from telegram.ext import (
     filters,
     ContextTypes,
 )
-import openai
+from openai import AsyncOpenAI
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -22,8 +22,10 @@ OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
 if not OPENROUTER_API_KEY:
     raise RuntimeError("OPENROUTER_API_KEY environment variable is required")
 
-openai.api_key = OPENROUTER_API_KEY
-openai.base_url = "https://openrouter.ai/api/v1"
+openai_client = AsyncOpenAI(
+    api_key=OPENROUTER_API_KEY,
+    base_url="https://openrouter.ai/api/v1",
+)
 MODEL = "openai/gpt-4.1-mini"
 
 # In-memory user storage
@@ -84,7 +86,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     context_info = summarize_dataframe(df)
     messages = history + [{"role": "user", "content": f"Table info:\n{context_info}"}]
 
-    resp = await openai.ChatCompletion.acreate(
+    resp = await openai_client.chat.completions.create(
         model=MODEL,
         messages=messages,
     )
