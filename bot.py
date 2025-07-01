@@ -106,6 +106,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         with redirect_stdout(stdout):
             exec(code, {}, local_vars)
     except Exception as e:
+        logger.exception("Error executing code:\n%s", code)
         await update.message.reply_text(f"Error executing code: {e}")
         return
     output_text = stdout.getvalue()
