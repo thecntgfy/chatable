@@ -2,6 +2,7 @@ import os
 import io
 import logging
 from contextlib import redirect_stdout
+import argparse
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -26,7 +27,9 @@ openai_client = AsyncOpenAI(
     api_key=OPENROUTER_API_KEY,
     base_url="https://openrouter.ai/api/v1",
 )
-MODEL = "openai/gpt-4.1-mini"
+
+DEFAULT_MODEL = "openai/gpt-4.1-mini"
+MODEL = os.environ.get("OPENROUTER_MODEL", DEFAULT_MODEL)
 
 # In-memory user storage
 user_data = {}
@@ -111,6 +114,18 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         await update.message.reply_photo(photo=open(output_file, "rb"))
 
 def main() -> None:
+    global MODEL
+
+    parser = argparse.ArgumentParser(description="Chatable Telegram Bot")
+    parser.add_argument(
+        "--model",
+        default=MODEL,
+        help="OpenRouter model name",
+    )
+    args = parser.parse_args()
+
+    MODEL = args.model
+
     token = os.environ.get("TELEGRAM_TOKEN")
     if not token:
         raise RuntimeError("TELEGRAM_TOKEN environment variable is required")
