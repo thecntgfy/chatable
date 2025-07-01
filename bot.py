@@ -4,6 +4,7 @@ import logging
 from contextlib import redirect_stdout
 import argparse
 import html
+import re
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -42,6 +43,18 @@ SYSTEM_PROMPT = (
     "If plotting, save figures to 'output.png'. "
     "Only return the Python code without explanations."
 )
+
+
+def extract_code(text: str) -> str:
+    """Return Python code from a model response or user input.
+
+    If the text contains a Markdown code block, the code inside the first block
+    is returned. Otherwise the text is returned unchanged.
+    """
+    match = re.search(r"```(?:\w+)?\n(.*?)```", text, re.DOTALL)
+    if match:
+        return match.group(1).strip()
+    return text.strip()
 
 def summarize_dataframe(df: pd.DataFrame, max_rows: int = 5) -> str:
     summary = [
@@ -95,6 +108,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         messages=messages,
     )
     code = resp.choices[0].message.content
+    code = extract_code(code)
     history.append({"role": "assistant", "content": code})
 
     stdout = io.StringIO()
